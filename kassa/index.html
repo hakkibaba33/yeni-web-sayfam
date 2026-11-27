@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kategori Sayfası</title>
+
+    <meta name="google-site-verification" content="P3JBpD-WcyvGlOGQnA5MK-UTGKS9IDMeDCUqSXK3GKI" />
+    <meta name="robots" content="index, follow">
+
+    <!-- Stripe Bağlantı Hızlandırma (Preconnect) -->
+    <link rel="preconnect" href="https://js.stripe.com">
+    <link rel="preconnect" href="https://m.stripe.network">
+
+    <!-- Temel meta tag'ler -->
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    
+    <!-- Canonical & Sosyal Medya Meta Tagleri -->
+    <link rel="canonical" href="">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DEKORIST">
+
+    <link rel="preconnect" href="https://mowyhsssmpjrwxzvelax.supabase.co">
+    <link rel="stylesheet" href="../assets/css/reset.css">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/checkout.css">
+
+    <script defer src="https://www.googletagmanager.com/gtag/js?id=G-GC40MGMLE1"></script>
+    <script src="https://js.stripe.com/v3/" defer></script>
+    <script src="../assets/js/config.js" defer></script>
+</head>
+
+<body>
+    <!-- Güvenlik Barı -->
+    <div class="checkout-top-bar">
+        <div class="top-bar-content">
+            <i class="fa-solid fa-lock"></i>
+            <span>Säker utcheckning med SSL-kryptering</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="custom-minimal-header">
+        <div class="header-left">
+            <a href="/mattor" class="nav-link dk-back-btn">
+                <img src="/assets/images/left-arrow.svg" alt="arrow" width="24">
+                <span>Fortsätt handla</span>
+            </a>
+        </div>
+
+        <div class="header-center">
+            <a href="/" class="logo-text">DEKORIST</a>
+        </div>
+
+        <div class="header-right">
+            <a href="/kontakt" class="nav-link dk-contact-btn">
+                <span>Kontakta oss</span>
+                <img src="/assets/images/support.svg" alt="support" width="24">
+            </a>
+        </div>
+    </header>
+
+    <main class="container" id="checkout-main-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+        <div id="checkout-header-area" class="checkout-modern-header">
+            <div class="header-left-aligned">
+                <h1>Kassa</h1>
+                <div class="full-width-form-border"></div>
+            </div>
+        </div>
+
+        <div id="checkout-content-root" class="checkout-grid-modern" style="display: none;">
+
+            <section class="checkout-form-column">
+                <!-- ADRES FORMU -->
+                <div class="checkout-section-card">
+                    <h2 class="section-title"><span class="step-number">1</span> Leveransadress</h2>
+                    <form id="address-form" class="form-grid woocommerce-checkout">
+                        <div class="form-row-split">
+                            <div class="form-group">
+                                <label for="billing_first_name">Förnamn</label>
+                                <input type="text" id="billing_first_name" name="billing_first_name" placeholder="Johan" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing_last_name">Efternamn</label>
+                                <input type="text" id="billing_last_name" name="billing_last_name" placeholder="Svensson" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-15">
+                            <label for="billing_email">E-postadress</label>
+                            <input type="email" id="billing_email" name="billing_email" placeholder="johan@example.com" required>
+                        </div>
+
+                        <div class="form-group mb-15">
+                            <label for="billing_phone">Telefonnummer</label>
+                            <input type="tel" id="billing_phone" name="billing_phone" placeholder="070 123 45 67" required>
+                        </div>
+
+                        <div class="form-group mb-15">
+                            <label for="billing_address_1">Adress</label>
+                            <input type="text" id="billing_address_1" name="billing_address_1" placeholder="Gatan 12, Lgh 1001" required>
+                        </div>
+
+                        <div class="form-row-split mb-15">
+                            <div class="form-group">
+                                <label for="billing_postcode">Postnummer</label>
+                                <input type="text" id="billing_postcode" name="billing_postcode" placeholder="123 45" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="billing_city">Ort</label>
+                                <input type="text" id="billing_city" name="billing_city" placeholder="Stockholm" required>
+                            </div>
+                        </div>
+
+                        <div class="terms-acceptance">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="accept-terms" required>
+                                <span class="terms-text">Jag godkänner <a href="/kopvillkor" target="_blank">köpvillkoren</a>.</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ÖDEME FORMU - Her zaman görünür -->
+                <div class="checkout-section-card mt-20" id="payment-section">
+                    <h2 class="section-title"><span class="step-number">2</span> Betalningsmetod</h2>
+                    <p class="payment-desc">Välj ditt önskade betalningssätt nedan. Du kan betala med kort eller Klarna.</p>
+                    <div id="payment-element">
+                        <!-- Stripe Payment Element buraya mount edilecek -->
+                        <p style="color:#999; padding:40px; text-align:center;">Laddar betalningsalternativ...</p>
+                    </div>
+                    <div id="card-errors" role="alert"></div>
+                </div>
+
+                <div id="checkout-validation-error" style="color: #e54d42; font-size: 14px; font-weight: 500; margin-bottom: 10px; display: none; text-align: center;">
+                    ⚠️ Vänligen fyll i alla obligatoriska fält korrekt.
+                </div>
+
+                <button id="confirm-payment-btn" class="main-checkout-btn btn-disabled" disabled>
+                    Fyll i leveransadressen först
+                </button>
+            </section>
+
+            <aside class="order-summary-column">
+                <div class="order-summary-box">
+                    <h2 class="summary-title">Din kundvagn</h2>
+                    <div class="summary-product-list"></div>
+                    <div class="totals-area">
+                        <div class="total-line">
+                            <span>Produkter:</span>
+                            <span id="subtotal-display">0 SEK</span>
+                        </div>
+                        <div class="total-line total-line-frakt">
+                            <span>Frakt:</span>
+                            <span class="static-shipping-text">Fri frakt</span>
+                        </div>
+                        <div class="total-line" style="color: #27ae60; display: none;">
+                            <span>Besparning:</span>
+                            <span id="savings-display">0 kr</span>
+                        </div>
+                        <div class="total-line grand-total">
+                            <strong>Total:</strong>
+                            <div class="total-price-wrapper" style="text-align: right; display: flex; flex-direction: column;">
+                                <strong id="grand-total-display">0 SEK</strong>
+                                <span class="moms-mini-text">inkl. moms</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="summary-trust-badges"></div>
+                </div>
+            </aside>
+        </div>
+
+        <div id="empty-cart-message-box" style="display: none; text-align:center; padding: 100px 0;">
+            <h2>Varukorgen är tom</h2>
+            <p>Det finns inga produkter i din kundvagn.</p>
+            <a href="/mattor" class="main-checkout-btn" style="text-decoration: none; display: inline-block; width: auto; padding: 15px 30px;">
+                Tillbaka till butiken
+            </a>
+        </div>
+
+    </main>
+
+   <section class="google-reviews-section">
+    <div class="reviews-container">
+        <div class="reviews-header">
+            <div class="google-badge">
+                <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" alt="Google" class="google-logo">
+                <div class="rating-info">
+                    <div class="rating-row">
+                        <span class="rating-score">4.3</span>
+                        <div class="stars-outer">
+                            <span class="stars-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                            <div class="stars-inner" style="width: 86%;">
+                                <span class="stars-fill">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="review-count">14 recensioner</span>
+                </div>
+            </div>
+            <h2 class="reviews-title">Vad våra kunder säger</h2>
+        </div>
+
+         <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-meta">
+                    <span class="reviewer-name">If metall</span>
+                    <span class="review-date">För 1 år sedan</span>
+                </div>
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Vi köpte två mattor till vår expedition som hade både mycket god kvalitet och ett mycket rimligt pris."</p>
+            </div>
+
+            <div class="review-card">
+                <div class="review-meta">
+                    <span class="reviewer-name">Ann Krets</span>
+                    <span class="review-date">För 1 år sedan</span>
+                </div>
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Jag köpte en matta för flera år sedan och den är ff som ny. Köpte ytterligare en i förra veckan på rea. Gillar dom för att de har en undersida som inte glider och att man lätt kan tvätta av fläckar om man råkar spilla."</p>
+            </div>
+
+            <div class="review-card">
+                <div class="review-meta">
+                    <span class="reviewer-name">Ahmet Özmehak</span>
+                    <span class="review-date">För 2 månader sedan</span>
+                </div>
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Trevligt"</p>
+            </div>
+        </div>
+        
+        <div class="reviews-footer">
+            <a href="https://g.page/r/Ccgg-v-8e685EBM/review" target="_blank" class="view-all-reviews">
+                Läs alla recensioner på Google
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer id="checkout-minimal-footer" class="custom-checkout-footer">
+        <div class="checkout-container">
+
+            <div class="checkout-info-grid">
+                <div class="info-item">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span class="info-title">Gratis och snabb Frakt</span>
+                    <span class="info-desc">Leveranstid i Sverige 1-5 Arbetsdagar</span>
+                </div>
+                <div class="info-item">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span class="info-title">Öppet Köp</span>
+                    <span class="info-desc">30 Dagars Returrätt</span>
+                </div>
+                <div class="info-item">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <span class="info-title">Säker Betalning</span>
+                    <span class="info-desc">SSL-Krypterad</span>
+                </div>
+            </div>
+
+            <hr class="footer-divider">
+
+            <div class="footer-help-section">
+    <p class="help-text">Behöver du hjälp med din beställning?</p>
+    <div class="footer-btn-group" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <a href="mailto:info@dekorist.se" class="footer-outline-btn">
+            <i class="far fa-envelope"></i> info@dekorist.se
+        </a>
+        <a href="tel:0046763016775" class="footer-outline-btn">
+            <i class="fas fa-phone-alt"></i> 076-301 67 75
+        </a>
+        <a href="/kopvillkor/" class="footer-outline-btn">Köpvillkor & Retur</a>
+    </div>
+</div>
+
+            <div class="footer-bottom-brand">
+                <div class="footer-text-logo">DEKORIST</div>
+
+                <p class="copyright">
+                    © 2021 - 2026 DEKORIST Sweden. Alla rättigheter förbehållna.
+                </p>
+                <p class="experience-text">Levererat inredning och mattor sedan 2021</p>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- ============================================
+     WHATSAPP FLOATING BUTTON
+     ============================================ -->
+<a href="https://wa.me/46763016775?text=Hej!%20Jag%20har%20en%20fråga%20om%20DEKORIST." 
+   target="_blank" 
+   rel="noopener noreferrer"
+   class="whatsapp-float"
+   aria-label="Chatta med oss på WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/>
+    </svg>
+</a>
+
+    <script src="/assets/js/common.js"></script>
+    <script src="/assets/js/checkout.js"></script>
+</body>
+</html>

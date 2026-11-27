@@ -1,0 +1,320 @@
+/*
+ Theme Name:   Hello Elementor Child DKR
+ Template:     hello-elementor
+ Version:      1.0.0
+*/
+
+
+/* Okların Genel Tasarımı (Eski kodu bununla güncelle) */
+.custom-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: #ffffff; /* Beyaz yuvarlak */
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Hafif gölge */
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* Ok İkonlarını Çizelim (CSS ile ok yapıyoruz) */
+.custom-arrow::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid #000; /* Siyah ok rengi */
+    border-right: 2px solid #000;
+    display: inline-block;
+}
+
+/* Sol Ok Yönü */
+.my-slider-prev::after {
+    transform: rotate(-135deg);
+    margin-left: 4px;
+}
+
+/* Sağ Ok Yönü */
+.my-slider-next::after {
+    transform: rotate(45deg);
+    margin-right: 4px;
+}
+
+/* Hover Efekti (Üzerine gelince siyah olsun) */
+.custom-arrow:hover {
+    background: #f0f0f0;
+}
+.custom-arrow:hover::after {
+    border-color: #000;
+}
+
+/* Okların Konumları (Taşma yapmasın diye) */
+.my-slider-next { right: 10px; }
+.my-slider-prev { left: 10px; }
+
+/* Mobilde gizlemeyi unutmayalım */
+@media (max-width: 768px) {
+    .custom-arrow { display: none !important; }
+}
+
+.my-slider-next { right: 10px; }
+.my-slider-prev { left: 10px; }
+
+
+
+
+
+
+
+
+
+
+
+
+/* Header sağ ikonlardaki tüm çizgileri ve efektleri temizle */
+.header-icons.right-icons a {
+    text-decoration: none !important;
+    border: none !important;
+    box-shadow: none !important; /* Hello Elementor'un gizli çizgisi buradadır */
+    outline: none !important;
+}
+
+/* Üzerine gelince (hover) oluşan efekti de sil */
+.header-icons.right-icons a:hover,
+.header-icons.right-icons a:focus,
+.header-icons.right-icons a:active {
+    text-decoration: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+/* İkonların kendi içindeki çizgileri de garantiye alalım */
+.header-icons.right-icons a i {
+    border: none !important;
+    text-decoration: none !important;
+}
+
+/* Sadece ana sayfada (home class'ı sayesinde) header'ın yapışık kalmasını engeller */
+.home header.site-header {
+    position: absolute !important; /* Veya relative */
+    top: 0;
+    width: 100%;
+}
+
+/* Eğer Elementor'un kendi sticky özelliği devreye giriyorsa onu devre dışı bırakalım */
+.home .elementor-sticky--active {
+    position: relative !important;
+}
+
+
+/* Slider başlangıçta görünmez olsun */
+.shortcode-slider {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out; /* Yumuşak açılış için */
+}
+
+/* JS yüklendiğinde eklenecek sınıf */
+.shortcode-slider.swiper-initialized {
+    opacity: 1;
+}
+
+/* Yüklenirken yerin boş kalmaması için min-height verelim */
+.custom-slider-outer-container {
+    min-height: 400px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.google-reviews-footer {
+    padding: 50px 0;
+    background-color: #fcfcfc; /* Arka planı hafif gri yaparak ayırabilirsin */
+    border-top: 1px solid #eee;
+}
+
+
+
+.google-reviews-footer .footer-container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+    padding-top: 40px; /* Bu değeri göz kararına göre 30px-50px arası değiştirebilirsin */
+}
+
+.google-reviews-section {
+    background-color: #f9f9f9;
+    padding: 60px 20px;
+    border-top: 1px solid #eee;
+    font-family: 'Inter', sans-serif;
+}
+
+.reviews-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Google Badge Alanı */
+.google-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.google-logo {
+    width: 24px; /* Logoyu küçülttük, rahatsız etmez */
+    height: auto;
+}
+
+.rating-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rating-score {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Yıldız Sistemi (4.3 Ayarı) */
+.stars-outer {
+    position: relative;
+    display: inline-block;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #e0e0e0; /* Boş yıldız rengi (Gri) */
+}
+
+.stars-inner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #fbbc04; /* Dolu yıldız rengi (Google Sarısı) */
+}
+
+.review-count {
+    font-size: 13px;
+    color: #666;
+    margin-top: -2px;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.review-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.review-card:hover { transform: translateY(-5px); }
+
+.review-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: #777;
+}
+
+.reviewer-name { font-weight: 600; color: #333; }
+
+.review-text {
+    margin-top: 15px;
+    line-height: 1.6;
+    color: #555;
+    font-style: italic;
+}
+
+.view-all-reviews {
+    display: inline-block;
+    margin-top: 40px;
+    color: #4285F4;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid #4285F4;
+}
+
+.reviews-footer { text-align: center; }
+
+
+/* --- MOBİL ÖZEL AYARLAR (Burayı Güncelliyoruz) --- */
+@media (max-width: 768px) {
+    .reviews-grid {
+        display: flex !important; /* Grid'den Flex'e geçtik */
+        overflow-x: auto !important; /* Yan yana kaydırmayı açtık */
+        scroll-snap-type: x mandatory; /* Kaydırırken kartın ortalanmasını sağlar */
+        gap: 15px !important;
+        padding: 10px 5px 20px 5px !important; /* Alt boşluk gölge için */
+        scrollbar-width: none; /* Firefox için scrollbar gizle */
+        -ms-overflow-style: none; /* IE için scrollbar gizle */
+    }
+
+    /* Scrollbar'ı Chrome/Safari için tamamen gizleyelim, daha temiz durur */
+    .reviews-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+.review-card {
+        flex: 0 0 260px !important;
+        min-width: 260px !important;
+        /* 1. Yüksekliği serbest bırakıyoruz, içeriğe göre daralsın */
+        height: auto !important;
+        min-height: 0!important; 
+        /* 2. Alt padding'i iyice kıstık */
+        padding: 12px 15px 8px 15px !important; 
+        /* 3. İçerideki elemanların otomatik yayılmasını engelliyoruz */
+        display: block !important; 
+    }
+
+.review-text {
+        /* Metnin altındaki margin'i sıfırlıyoruz */
+        margin-bottom: 0 !important;
+        padding-bottom: 5px !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 3 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+    }
+    
+    .review-meta {
+        /* İsim/Tarih kısmının alt boşluğunu minimize ettik */
+        margin-bottom: 2px !important;
+    }
+
+    .reviewer-name {
+        font-size: 14px !important;
+    }
+
+    .reviews-header {
+        margin-bottom: 25px !important; /* Üst başlık boşluğunu daralttık */
+    }
+}
+

@@ -1,0 +1,1157 @@
+// ==========================================
+// CardModule fonksiyonları card.js'den geliyor: getColorStyle, getDisplayPrice, getVariantDisplayText, createProductCard, isInWishlist, updateWishlistBadge, initLazyImages, attachWishlistEvents
+
+// CATEGORY.JS - SUPABASE UYUMLU (v5.8)
+// Modern Filtre Cekmecesi: Ana panel -> Alt panel slide yapisi
+// Guncelleme: Profesyonel resim yukleme (IntersectionObserver + fade-in)
+// ==========================================
+
+console.log('category.js yukleniyor...');
+console.log('CONFIG durumu:', typeof CONFIG !== 'undefined' ? 'Yuklu' : 'YUKLU DEGIL!');
+
+function getCurrentCategory() {
+    const path = window.location.pathname;
+    const cleanPath = path.replace(/^\/+|\/+$/g, '');
+    const category = cleanPath.split('/')[0] || null;
+    console.log('URL path:', path);
+    console.log('Clean path:', cleanPath);
+    console.log('Kategori:', category);
+    return category;
+}
+
+function getCurrentSubCategory() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('kategori');
+}
+
+function isReaPage() {
+    return window.location.pathname.includes('/rea/');
+}
+
+const titleMap = {
+    'mattor': 'Mattor',
+    'metervara': 'Metervara',
+    'gangmattor': 'Gångmattor',
+    'badrumsmattor': 'Badrumsmattor',
+    'gardiner': 'Gardiner',
+    'soffor': 'Soffor',
+    'bord-stolar': 'Bord & Stolar',
+    'rea': 'REA',
+    'kontakt': 'Kontakt'
+};
+
+function updatePageTitle(category) {
+    let title = titleMap[category] || 'Produkter';
+    const newTitle = 'Alla ' + title;
+    
+    document.title = newTitle + ' | DEKORIST';
+
+    const pageTitle = document.getElementById('category-main-title');
+    if (pageTitle && pageTitle.textContent !== newTitle) {
+        pageTitle.textContent = newTitle;
+    }
+
+    const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+    if (breadcrumbCurrent && breadcrumbCurrent.textContent !== title) {
+        breadcrumbCurrent.textContent = title;
+    }
+}
+
+function updateChipsActiveState() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentKategori = urlParams.get('kategori');
+
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.classList.remove('active');
+        const chipKategori = chip.dataset.chip;
+
+        if (currentKategori === chipKategori) {
+            chip.classList.add('active');
+        }
+    });
+}
+
+function initChipsRouting() {
+    const chipsContainer = document.getElementById('category-chips-list');
+    if (!chipsContainer) return;
+
+    chipsContainer.addEventListener('click', (e) => {
+        const chip = e.target.closest('.category-chip');
+        if (!chip) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const href = chip.getAttribute('href');
+        if (!href) return;
+
+        window.history.pushState({}, '', href);
+        window.dispatchEvent(new Event('popstate'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+// ==========================================
+// RENK ESLESTIRME - Isvecce -> CSS
+// ==========================================
+
+
+// ==========================================
+// KATEGORI SAYFASI SEO META TAG'LERI + SAYFA ALTI ICERIK
+// ==========================================
+function updateCategoryMetaTags(seoData) {
+    if (!seoData) return;
+    
+    // 1. <title>
+    document.title = seoData.title || 'Kategori | DEKORIST';
+    
+    // 2. <meta name="description">
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', seoData.meta_description || '');
+    
+    // 3. <meta name="keywords">
+    if (seoData.keywords) {
+        let metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (!metaKeywords) {
+            metaKeywords = document.createElement('meta');
+            metaKeywords.setAttribute('name', 'keywords');
+            document.head.appendChild(metaKeywords);
+        }
+        metaKeywords.setAttribute('content', seoData.keywords);
+    }
+    
+    // 4. <link rel="canonical">
+    const canonicalUrl = seoData.canonical_url || 'https://DEKORIST.se/' + window.location.pathname.replace(/^\/+|\/+$/g, '');
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalUrl);
+    
+    // 5. Open Graph
+    const ogImage = seoData.og_image || '';
+    const ogTitle = seoData.title || '';
+    const ogDesc = seoData.meta_description || '';
+    
+    let ogTitleTag = document.querySelector('meta[property="og:title"]');
+    if (!ogTitleTag) {
+        ogTitleTag = document.createElement('meta');
+        ogTitleTag.setAttribute('property', 'og:title');
+        document.head.appendChild(ogTitleTag);
+    }
+    ogTitleTag.setAttribute('content', ogTitle);
+    
+    let ogDescTag = document.querySelector('meta[property="og:description"]');
+    if (!ogDescTag) {
+        ogDescTag = document.createElement('meta');
+        ogDescTag.setAttribute('property', 'og:description');
+        document.head.appendChild(ogDescTag);
+    }
+    ogDescTag.setAttribute('content', ogDesc);
+    
+    if (ogImage) {
+        let ogImageTag = document.querySelector('meta[property="og:image"]');
+        if (!ogImageTag) {
+            ogImageTag = document.createElement('meta');
+            ogImageTag.setAttribute('property', 'og:image');
+            document.head.appendChild(ogImageTag);
+        }
+        ogImageTag.setAttribute('content', ogImage);
+    }
+    
+    let ogType = document.querySelector('meta[property="og:type"]');
+    if (!ogType) {
+        ogType = document.createElement('meta');
+        ogType.setAttribute('property', 'og:type');
+        document.head.appendChild(ogType);
+    }
+    ogType.setAttribute('content', 'website');
+    
+    let ogUrl = document.querySelector('meta[property="og:url"]');
+    if (!ogUrl) {
+        ogUrl = document.createElement('meta');
+        ogUrl.setAttribute('property', 'og:url');
+        document.head.appendChild(ogUrl);
+    }
+    ogUrl.setAttribute('content', canonicalUrl);
+    
+    // 6. Twitter Cards
+    let twitterCard = document.querySelector('meta[name="twitter:card"]');
+    if (!twitterCard) {
+        twitterCard = document.createElement('meta');
+        twitterCard.setAttribute('name', 'twitter:card');
+        document.head.appendChild(twitterCard);
+    }
+    twitterCard.setAttribute('content', 'summary_large_image');
+    
+    // 7. Schema.org JSON-LD
+    const schemaType = seoData.schema_type || 'CollectionPage';
+    const schemaData = {
+        '@context': 'https://schema.org',
+        '@type': schemaType,
+        'name': seoData.title || '',
+        'description': seoData.meta_description || '',
+        'url': canonicalUrl
+    };
+    
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+            {
+                '@type': 'ListItem',
+                'position': 1,
+                'name': 'Hem',
+                'item': 'https://DEKORIST.se/'
+            },
+            {
+                '@type': 'ListItem',
+                'position': 2,
+                'name': seoData.title || 'Kategori',
+                'item': canonicalUrl
+            }
+        ]
+    };
+    
+    let existingSchema = document.querySelector('script[data-category-schema="true"]');
+    if (existingSchema) existingSchema.remove();
+    
+    const schemaScript = document.createElement('script');
+    schemaScript.setAttribute('type', 'application/ld+json');
+    schemaScript.setAttribute('data-category-schema', 'true');
+    schemaScript.textContent = JSON.stringify([schemaData, breadcrumbSchema], null, 2);
+    document.head.appendChild(schemaScript);
+    
+    // ==========================================
+    // YENI: SAYFA ALTI SEO ICERIGI (BODY'DE GORUNUR)
+    // ==========================================
+    renderSeoContent(seoData);
+}
+
+// ==========================================
+// SAYFA ALTI SEO ICERIGI RENDER
+// ==========================================
+function renderSeoContent(seoData) {
+    const container = document.getElementById('seo-content');
+    const inner = document.getElementById('seo-inner');
+    
+    if (!container || !inner) {
+        console.log('[SEO Content] Container bulunamadi');
+        return;
+    }
+    
+    if (!seoData.content && !seoData.meta_description) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    
+    // Icerik wrapper div icine alindi, tum etiketler ortalanacak
+    inner.innerHTML = `
+        <div class="seo-content-wrapper">
+            <h2 class="seo-auto-title">${seoData.title || ''}</h2>
+            <div class="seo-text-body" id="seo-text-body">
+                ${seoData.content || '<p>' + seoData.meta_description + '</p>'}
+            </div>
+            <div class="seo-read-more-wrapper">
+                <button class="seo-read-more-btn" id="seo-read-more-btn" onclick="toggleSeoContent()">
+                    Läs mer
+                    <svg class="seo-arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    console.log('[SEO Content] Sayfa alti icerigi render edildi');
+}
+
+
+// ==========================================
+// "Läs mer" / "Visa mindre" TOGGLE
+// ==========================================
+function toggleSeoContent() {
+    const body = document.getElementById('seo-text-body');
+    const btn = document.getElementById('seo-read-more-btn');
+    
+    if (!body || !btn) return;
+    
+    const isExpanded = body.classList.toggle('expanded');
+    btn.classList.toggle('active', isExpanded);
+    
+    if (isExpanded) {
+        btn.innerHTML = 'Visa mindre';
+    } else {
+        btn.innerHTML = 'Läs mer';
+        document.getElementById('seo-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// ==========================================
+// PROFESYONEL RESIM YUKLEME v2
+// - Ziplama/goz kirpma sorunu cozuldu
+// ==========================================
+// imageObserver card.js'den geliyor
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    if (window.__categoryInitDone) {
+        console.log('category.js: init zaten calisti, atlaniyor.');
+        return;
+    }
+    window.__categoryInitDone = true;
+
+    let __fetchProductsInFlight = false;
+
+    async function fetchProductsOnce() {
+        if (__fetchProductsInFlight) return;
+        __fetchProductsInFlight = true;
+        try {
+            await fetchProducts();
+        } finally {
+            __fetchProductsInFlight = false;
+        }
+    }
+
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentPage = 0;
+    const ITEMS_PER_PAGE = 12;
+
+    const grid = document.getElementById('product-grid');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const currentCountEl = document.getElementById('current-count');
+    const totalCountEl = document.getElementById('total-count');
+    const progressBar = document.getElementById('progress-bar-fill');
+
+    const SUPABASE_URL = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE) ? CONFIG.SUPABASE.URL : '';
+    const SUPABASE_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE) ? CONFIG.SUPABASE.ANON_KEY : '';
+
+    async function supabaseGet(endpoint, params) {
+        const url = new URL(SUPABASE_URL + '/rest/v1/' + endpoint);
+        if (params) Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+        const res = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!res.ok) {
+            const errText = await res.text();
+            console.error('Supabase hata detayi:', errText);
+            throw new Error('Supabase GET hatasi: ' + res.status);
+        }
+        return res.json();
+    }
+
+
+    async function fetchCategories() {
+        try {
+            const categories = await supabaseGet('categories', {
+                select: '*',
+                active: 'eq.true',
+                order: 'sort_order.asc'
+            });
+            return categories || [];
+        } catch (error) {
+            console.error('Kategori cekme hatasi:', error);
+            return [];
+        }
+    }
+
+    async function fetchSubCategories() {
+        try {
+            const subCategories = await supabaseGet('sub_categories', {
+                select: '*',
+                active: 'eq.true',
+                order: 'sort_order.asc'
+            });
+            return subCategories || [];
+        } catch (error) {
+            console.error('Alt kategori cekme hatasi:', error);
+            return [];
+        }
+    }
+
+ function renderChips(categories, subCategories) {
+    const chipsContainer = document.getElementById('category-chips-list');
+    const chipsWrapper = document.querySelector('.category-chips-wrapper');
+    if (!chipsContainer) return;
+
+    const currentCategory = getCurrentCategory();
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSubCategory = urlParams.get('kategori');
+
+    // Önceki chip'leri kontrol et
+    const existingChips = chipsContainer.querySelectorAll('.category-chip');
+    const existingSlugs = Array.from(existingChips).map(c => c.dataset.chip).join(',');
+
+    let chipsHTML = '';
+    const category = categories.find(c => c.slug === currentCategory);
+    
+    if (category && Array.isArray(subCategories)) {
+        const catId = parseInt(category.id);
+        const categorySubs = subCategories.filter(s => {
+            return s && parseInt(s.category_id) === catId && s.active !== false;
+        });
+
+        console.log('Chips render - Kategori:', currentCategory, 'ID:', catId, 'Alt kategori sayisi:', categorySubs.length);
+
+        // YENI: Eger alt kategori yoksa container'i gizle
+        if (categorySubs.length === 0) {
+            if (chipsWrapper) chipsWrapper.style.display = 'none';
+            chipsContainer.innerHTML = '';
+            return;
+        }
+
+        categorySubs.forEach(sub => {
+            const isActive = currentSubCategory === sub.slug;
+            chipsHTML += `<a href="/${currentCategory}/?kategori=${sub.slug}" class="category-chip ${isActive ? 'active' : ''}" data-chip="${sub.slug}">${sub.name}</a>`;
+        });
+    } else {
+        // Kategori bulunamadiysa da gizle
+        if (chipsWrapper) chipsWrapper.style.display = 'none';
+        chipsContainer.innerHTML = '';
+        return;
+    }
+
+    // Yeni chip'lerin slug'larını al
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = chipsHTML;
+    const newSlugs = Array.from(tempDiv.querySelectorAll('.category-chip')).map(c => c.dataset.chip).join(',');
+
+    // Eğer aynıysa sadece active state güncelle
+    if (existingSlugs === newSlugs && existingChips.length > 0) {
+        updateChipsActiveState();
+        return;
+    }
+
+    // Değiştiyse opacity ile smooth geçiş
+    chipsContainer.style.opacity = '0';
+    setTimeout(() => {
+        chipsContainer.innerHTML = chipsHTML;
+        initChipsRouting();
+        updateChipsActiveState();
+        chipsContainer.style.opacity = '1';
+    }, 150);
+}
+
+    async function fetchProducts() {
+        try {
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="product-card skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line title"></div>
+                            <div class="skeleton-line price"></div>
+                            <div class="skeleton-line meta"></div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line title"></div>
+                            <div class="skeleton-line price"></div>
+                            <div class="skeleton-line meta"></div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line title"></div>
+                            <div class="skeleton-line price"></div>
+                            <div class="skeleton-line meta"></div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton-card">
+                        <div class="skeleton-image"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-line title"></div>
+                            <div class="skeleton-line price"></div>
+                            <div class="skeleton-line meta"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const currentCategory = getCurrentCategory();
+            const subCategory = getCurrentSubCategory();
+
+            const [categories, subCategories] = await Promise.all([
+                fetchCategories(),
+                fetchSubCategories()
+            ]);
+
+            renderChips(categories, subCategories);
+            updatePageTitle(currentCategory);
+
+            const queryParams = {
+                select: '*',
+                active: 'eq.true'
+            };
+
+            if (isReaPage()) {
+                queryParams.discount_price = 'not.is.null';
+                console.log('REA sayfasi: Indirimli urunler cekiliyor');
+            } else if (currentCategory) {
+                queryParams.categories = 'cs.{"' + currentCategory + '"}';
+                console.log(currentCategory + ' kategorisi: Urunler cekiliyor');
+            }
+
+            if (subCategory) {
+                queryParams.sub_category = 'eq.' + subCategory;
+                console.log('Alt kategori filtresi:', subCategory);
+            }
+
+            const products = await supabaseGet('products', queryParams);
+
+            const variants = await supabaseGet('product_variants', {
+                select: '*'
+            });
+
+            const data = products.map(p => ({
+                ...p,
+                product_variants: variants.filter(v => v.product_id === p.id)
+            }));
+
+            allProducts = data.map(product => {
+                let productVariants = product.product_variants || [];
+                
+                if (productVariants.length === 0 && product.simple_size) {
+                    productVariants = [{
+                        size: product.simple_size,
+                        color: null,
+                        price: product.base_price || 0,
+                        discount_price: product.discount_price || null,
+                        stock: 999
+                    }];
+                }
+                
+                   return {
+                    id: product.id,
+                    name: product.name || 'Urun',
+                    price: getDisplayPrice(product),
+                    base_price: product.base_price || 0,
+                    discount_price: product.discount_price || null,
+                    image: product.images && product.images[0] ? product.images[0] : '',
+                    slug: product.slug || '',
+                    description: product.description || '',
+                    variants: productVariants,
+                    colors: product.colors || [],
+                    sizes: productVariants.map(v => v.size),
+                    measurements: product.measurements || [],
+                    m2_available_widths: product.m2_available_widths || [],
+                    m2_calculator_active: product.m2_calculator_active || false,
+                    gardin_measurements: product.gardin_measurements || [],
+                    gardin_calculator_active: product.gardin_calculator_active || false,
+                    stock: productVariants.length > 0 
+                    ? (productVariants.some(v => v.stock > 0) ? 'In Stock' : 'Out of Stock')
+                      : 'In Stock',
+                    delivery_time: product.delivery_time || '3-7 arbetsdagar',
+                    card_badge: product.card_badge || null,
+                    card_badge_secondary: product.card_badge_secondary || null,
+                   };
+                });
+
+            filteredProducts = [...allProducts];
+
+            console.log(allProducts.length + ' urun yuklendi');
+
+            renderProducts(); 
+            updateProgress();
+            generateFilters();
+
+            // SEO Meta Tags
+            if (currentCategory && typeof updateCategoryMetaTags === 'function') {
+                try {
+                    const seoData = await supabaseGet('seo_content', {
+                        page_slug: 'eq.' + currentCategory,
+                        active: 'eq.true',
+                        select: '*'
+                    });
+                    
+                    console.log('SEO verisi:', seoData);
+                    
+                    if (seoData && seoData.length > 0) {
+                        const item = seoData[0];
+                        updateCategoryMetaTags({
+                            title: item.title || '...',
+                            meta_description: item.meta_description || '',
+                            keywords: item.seo_keywords || item.keywords || '',
+                            content: item.content || '',
+                            og_image: item.og_image || '',
+                            canonical_url: item.canonical_url || '',
+                            schema_type: item.schema_type || 'CollectionPage'
+                        });
+                    } else {
+                        console.log('SEO verisi bulunamadi, fallback kullaniliyor');
+                        updateCategoryMetaTags({
+                            title: 'Alla ' + (titleMap[currentCategory] || 'Produkter') + ' | DEKORIST',
+                            meta_description: 'Köp ' + (titleMap[currentCategory] || 'produkter') + ' online hos DEKORIST. Stort utbud och snabb leverans.',
+                            keywords: (titleMap[currentCategory] || 'produkter') + ', köpa online, DEKORIST',
+                            og_image: '',
+                            canonical_url: 'https://DEKORIST.se/' + currentCategory,
+                            schema_type: 'CollectionPage'
+                        });
+                    }
+                } catch (e) {
+                    console.error('[SEO] Kategori meta tag güncelleme hatasi:', e);
+                }
+            }
+
+        } catch (error) {
+            console.error('Urun cekme hatasi:', error);
+            grid.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:80px 20px;">
+                    <p style="font-size:18px; color:#666; margin-bottom:20px;">Kunde inte ladda produkter.</p>
+                    <p style="color:#999; margin-bottom:30px;">${error.message}</p>
+                    <button onclick="location.reload()" class="visa-mer-btn">Forsok igen</button>
+                </div>
+            `;
+        }
+    }
+
+
+    function renderProducts(append = false) {
+        if (!append) {
+            grid.innerHTML = '';
+            currentPage = 0;
+        }
+
+        const start = currentPage * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const productsToShow = filteredProducts.slice(start, end);
+
+        if (productsToShow.length === 0 && !append) {
+            grid.innerHTML = `
+                <div style="grid-column:1/-1; text-align:center; padding:60px;">
+                    <p style="font-size:18px; color:#666;">Inga produkter hittades.</p>
+                </div>
+            `;
+            document.getElementById('load-more-container').style.display = 'none';
+            return;
+        }
+
+        productsToShow.forEach(product => {
+            const isWishlisted = isInWishlist(product.id);
+            const cardHTML = createProductCard(product, isWishlisted);
+            grid.insertAdjacentHTML('beforeend', cardHTML);
+        });
+
+        // YENI: Profesyonel lazy loading'i baslat
+        initLazyImages();
+        
+        attachWishlistEvents();
+
+        const shown = (currentPage + 1) * ITEMS_PER_PAGE;
+        if (shown >= filteredProducts.length) {
+            document.getElementById('load-more-container').style.display = 'none';
+        } else {
+            document.getElementById('load-more-container').style.display = 'block';
+        }
+    }
+
+    // YENI: createProductCard - data-src ile profesyonel resim yukleme
+
+
+
+
+
+    let filterState = {
+        colors: [],
+        sizes: [],
+        widths: []
+    };
+
+    function generateFilters() {
+        const allColors = [...new Set(allProducts.flatMap(p => p.colors))].filter(Boolean).sort();
+        const allSizes = [...new Set(allProducts.flatMap(p => p.sizes))].filter(Boolean).sort((a, b) => {
+            const getArea = s => {
+                const nums = s.match(/\d+/g);
+                return nums ? nums.reduce((acc, n) => acc * parseInt(n), 1) : 0;
+            };
+            return getArea(a) - getArea(b);
+        });
+
+        const allWidths = [...new Set(allProducts.flatMap(p => {
+            if (p.m2_calculator_active && p.m2_available_widths && p.m2_available_widths.length > 0) {
+                return p.m2_available_widths.map(w => String(w));
+            }
+            return [];
+        }))].filter(Boolean).sort((a, b) => parseInt(a) - parseInt(b));
+
+        const showWidthFilter = allWidths.length > 0;
+
+        const mainPanel = document.getElementById('main-panel');
+        if (!mainPanel) return;
+
+        let mainHTML = '';
+        
+        if (allColors.length > 0) {
+            mainHTML += `
+                <div class="filter-menu-item" data-filter-type="color">
+                    <div class="filter-menu-content">
+                        <span class="filter-menu-label">Färg</span>
+                        <div class="filter-menu-preview" id="color-preview"></div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            `;
+        }
+        
+        if (allSizes.length > 0) {
+            mainHTML += `
+                <div class="filter-menu-item" data-filter-type="size">
+                    <div class="filter-menu-content">
+                        <span class="filter-menu-label">Storlek</span>
+                        <span class="filter-menu-count" id="size-count" style="display:none;">0</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            `;
+        }
+
+        if (showWidthFilter) {
+            mainHTML += `
+                <div class="filter-menu-item" data-filter-type="width">
+                    <div class="filter-menu-content">
+                        <span class="filter-menu-label">Bredd</span>
+                        <span class="filter-menu-count" id="width-count" style="display:none;">0</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+            `;
+        }
+
+        mainPanel.innerHTML = mainHTML;
+
+        const colorSubPanel = document.getElementById('color-sub-panel');
+        if (colorSubPanel && allColors.length > 0) {
+            colorSubPanel.innerHTML = `
+                <div class="sub-panel-header">
+                    <button class="back-to-main" data-target="color">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <span>Färg</span>
+                    </button>
+                    <span class="sub-panel-count" id="color-sub-count">0 valda</span>
+                </div>
+                <div class="color-filter-grid">
+                    ${allColors.map(color => `
+                        <div class="color-item">
+                            <input type="checkbox" 
+                                   class="filter-input" 
+                                   id="color-${color.replace(/\s/g, '-')}" 
+                                   value="${color}" 
+                                   data-type="color">
+                            <label class="color-circle-wrapper" for="color-${color.replace(/\s/g, '-')}">
+                                <span class="color-circle" style="background: ${getColorStyle(color)};"></span>
+                                <span class="color-name">${color}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        const sizeSubPanel = document.getElementById('size-sub-panel');
+        if (sizeSubPanel && allSizes.length > 0) {
+            sizeSubPanel.innerHTML = `
+                <div class="sub-panel-header">
+                  <button class="back-to-main" data-target="size">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  <span>Storlek</span>
+                </button>
+                    <span class="sub-panel-count" id="size-sub-count">0 valda</span>
+                </div>
+                <div class="size-filter-grid">
+                    ${allSizes.map(size => `
+                        <div class="size-item">
+                            <input type="checkbox" 
+                                   class="filter-input" 
+                                   id="size-${size.replace(/\s/g, '-')}" 
+                                   value="${size}" 
+                                   data-type="size">
+                            <label class="size-box" for="size-${size.replace(/\s/g, '-')}">
+                                <span class="size-text">${size}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        const widthSubPanel = document.getElementById('width-sub-panel');
+        if (widthSubPanel && showWidthFilter) {
+            widthSubPanel.innerHTML = `
+                <div class="sub-panel-header">
+                  <button class="back-to-main" data-target="width">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                  <span>Bredd</span>
+                </button>
+                    <span class="sub-panel-count" id="width-sub-count">0 valda</span>
+                </div>
+                <div class="size-filter-grid">
+                    ${allWidths.map(width => `
+                        <div class="size-item">
+                            <input type="checkbox" 
+                                   class="filter-input" 
+                                   id="width-${width}" 
+                                   value="${width}" 
+                                   data-type="width">
+                            <label class="size-box" for="width-${width}">
+                                <span class="size-text">${width} cm</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        setupFilterEvents();
+    }
+
+
+       const urlSizeParam = new URLSearchParams(window.location.search).get('size');
+if (urlSizeParam) {
+    const normalizedParam = urlSizeParam.trim().toLowerCase();
+    document.querySelectorAll('input[data-type="size"]').forEach(input => {
+        if (input.value.trim().toLowerCase() === normalizedParam) {
+            input.checked = true;
+        }
+    });
+    updateFilterState();
+    applyFilters();
+    updateClearButtonVisibility();
+    updateFilterPreview();
+}
+
+
+
+    function setupFilterEvents() {
+        document.querySelectorAll('.filter-menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.dataset.filterType;
+                openSubPanel(type);
+            });
+        });
+
+        document.querySelectorAll('.back-to-main').forEach(btn => {
+            btn.addEventListener('click', () => {
+                closeSubPanel();
+            });
+        });
+
+        document.querySelectorAll('.filter-input').forEach(input => {
+            input.addEventListener('change', () => {
+                updateFilterState();
+                applyFilters();
+                updateClearButtonVisibility();
+                updateFilterPreview();
+            });
+        });
+    }
+
+    function openSubPanel(type) {
+        const mainPanel = document.getElementById('main-panel');
+        const subPanel = document.getElementById(type + '-sub-panel');
+        
+        if (mainPanel) mainPanel.classList.add('slide-out');
+        if (subPanel) subPanel.classList.add('slide-in');
+    }
+
+    function closeSubPanel() {
+        const mainPanel = document.getElementById('main-panel');
+        const subPanels = document.querySelectorAll('.sub-panel');
+        
+        if (mainPanel) mainPanel.classList.remove('slide-out');
+        subPanels.forEach(panel => panel.classList.remove('slide-in'));
+    }
+
+    function updateFilterState() {
+        filterState.colors = Array.from(document.querySelectorAll('input[data-type="color"]:checked')).map(el => el.value);
+        filterState.sizes = Array.from(document.querySelectorAll('input[data-type="size"]:checked')).map(el => el.value);
+        filterState.widths = Array.from(document.querySelectorAll('input[data-type="width"]:checked')).map(el => el.value);
+    }
+
+    function updateFilterPreview() {
+        const colorPreview = document.getElementById('color-preview');
+        if (colorPreview) {
+            if (filterState.colors.length > 0) {
+                colorPreview.innerHTML = filterState.colors.slice(0, 3).map(c => 
+                    `<span class="preview-dot" style="background: ${getColorStyle(c)};"></span>`
+                ).join('') + (filterState.colors.length > 3 ? `<span class="preview-more">+${filterState.colors.length - 3}</span>` : '');
+                colorPreview.style.display = 'flex';
+            } else {
+                colorPreview.innerHTML = '';
+                colorPreview.style.display = 'none';
+            }
+        }
+
+        const sizeCount = document.getElementById('size-count');
+        if (sizeCount) {
+            if (filterState.sizes.length > 0) {
+                sizeCount.textContent = filterState.sizes.length;
+                sizeCount.style.display = 'inline-flex';
+            } else {
+                sizeCount.style.display = 'none';
+            }
+        }
+
+        const sizeSubCount = document.getElementById('size-sub-count');
+        if (sizeSubCount) sizeSubCount.textContent = filterState.sizes.length + ' valda';
+        
+        const widthSubCount = document.getElementById('width-sub-count');
+        if (widthSubCount) widthSubCount.textContent = filterState.widths.length + ' valda';
+        
+        const widthCount = document.getElementById('width-count');
+        if (widthCount) {
+            if (filterState.widths.length > 0) {
+                widthCount.textContent = filterState.widths.length;
+                widthCount.style.display = 'inline-flex';
+            } else {
+                widthCount.style.display = 'none';
+            }
+        }
+    }
+
+    function applyFilters() {
+    const checkedColors = filterState.colors.map(c => String(c).toLowerCase());
+    const checkedSizes = filterState.sizes.map(s => String(s).toLowerCase());
+    const checkedWidths = filterState.widths.map(w => String(w));
+
+    filteredProducts = allProducts.filter(product => {
+        const productColors = (product.colors || []).map(c => String(c).toLowerCase());
+        const productSizes = (product.sizes || []).filter(Boolean).map(s => String(s).toLowerCase());
+
+        const colorMatch = checkedColors.length === 0 || productColors.some(c => checkedColors.includes(c));
+        const sizeMatch = checkedSizes.length === 0 || productSizes.some(s => checkedSizes.includes(s));
+        const widthMatch = checkedWidths.length === 0 || (
+            product.m2_calculator_active &&
+            product.m2_available_widths &&
+            product.m2_available_widths.some(w => checkedWidths.includes(String(w)))
+        );
+        return colorMatch && sizeMatch && widthMatch;
+    });
+
+    currentPage = 0;
+    renderProducts();
+    updateProgress();
+    updateFilterBadge(checkedColors.length + checkedSizes.length + checkedWidths.length);
+}
+
+    function updateFilterBadge(count) {
+        const badge = document.querySelector('.filter-badge');
+        if (badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+    }
+
+    function clearAllFilters() {
+        console.log('>>> clearAllFilters CAGIRILDI');
+
+        document.querySelectorAll('.filter-input:checked').forEach(input => {
+            input.checked = false;
+        });
+
+        document.querySelectorAll('input[name="orderby"]').forEach(radio => {
+            radio.checked = radio.value === 'default';
+        });
+
+        filterState = { colors: [], sizes: [], widths: [] };
+        filteredProducts = [...allProducts];
+        currentPage = 0;
+
+        renderProducts();
+        updateProgress();
+        updateFilterBadge(0);
+        updateFilterPreview();
+
+        const clearBtn = document.getElementById('clear-all-filters');
+        if (clearBtn) {
+            clearBtn.classList.remove('visible');
+            clearBtn.style.display = 'none';
+        }
+
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+
+        console.log('Tum filtreler temizlendi, urun sayisi:', filteredProducts.length);
+    }
+
+    function initClearFilters() {
+        console.log('>>> initClearFilters CAGIRILDI');
+        const mainClearBtn = document.getElementById('clear-all-filters');
+        if (mainClearBtn) {
+            mainClearBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('>>> RENSA butonuna tiklandi - TUMUNU SIFIRLA');
+                clearAllFilters();
+            });
+        }
+    }
+
+   function updateClearButtonVisibility() {
+    const checkedFilters = document.querySelectorAll('.filter-input:checked').length;
+    let hasSort = false;
+    document.querySelectorAll('input[name="orderby"]').forEach(radio => {
+        if (radio.checked && radio.value !== 'default') {
+            hasSort = true;
+        }
+    });
+
+    const totalActive = checkedFilters + (hasSort ? 1 : 0);
+
+    const clearBtn = document.getElementById('clear-all-filters');
+    if (clearBtn) {
+        if (totalActive > 0) {
+            clearBtn.classList.add('visible');
+            clearBtn.style.display = 'inline-flex';
+            clearBtn.style.opacity = '1';
+        } else {
+            clearBtn.style.opacity = '0';
+            setTimeout(() => {
+                clearBtn.classList.remove('visible');
+                clearBtn.style.display = 'none';
+            }, 200);
+        }
+    }
+
+    console.log('Aktif filtre/siralama sayisi:', totalActive);
+}
+
+    function initSort() {
+        document.querySelectorAll('input[name="orderby"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const sortType = e.target.value;
+                switch(sortType) {
+                    case 'price-asc': filteredProducts.sort((a, b) => a.price - b.price); break;
+                    case 'price-desc': filteredProducts.sort((a, b) => b.price - a.price); break;
+                    case 'name-asc': filteredProducts.sort((a, b) => a.name.localeCompare(b.name)); break;
+                    case 'name-desc': filteredProducts.sort((a, b) => b.name.localeCompare(a.name)); break;
+                    default: filteredProducts.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+                }
+                currentPage = 0;
+                renderProducts();
+                closeAllDrawers();
+                updateClearButtonVisibility();
+            });
+        });
+    }
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage++;
+            renderProducts(true);
+            updateProgress();
+        });
+    }
+
+    function updateProgress() {
+        const shown = Math.min((currentPage + 1) * ITEMS_PER_PAGE, filteredProducts.length);
+        const total = filteredProducts.length;
+        if (currentCountEl) currentCountEl.textContent = shown;
+        if (totalCountEl) totalCountEl.textContent = total;
+        if (progressBar) {
+            const percentage = total > 0 ? (shown / total) * 100 : 0;
+            progressBar.style.width = percentage + '%';
+        }
+    }
+
+    function initDrawers() {
+        const openFilter = document.getElementById('open-filter-sidebar');
+        const closeFilter = document.getElementById('close-filter-sidebar');
+        const filterOverlay = document.getElementById('filter-overlay');
+        const filterDrawer = document.getElementById('filter-sidebar');
+
+        openFilter?.addEventListener('click', () => {
+            filterDrawer?.classList.add('active');
+            filterOverlay?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        const closeFilterFn = () => {
+            filterDrawer?.classList.remove('active');
+            filterOverlay?.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => closeSubPanel(), 300);
+        };
+
+        closeFilter?.addEventListener('click', closeFilterFn);
+        filterOverlay?.addEventListener('click', closeFilterFn);
+
+        const openSort = document.getElementById('sort-menu-btn');
+        const closeSort = document.getElementById('close-sort-drawer');
+        const sortOverlay = document.getElementById('sort-overlay');
+        const sortDrawer = document.getElementById('sort-drawer');
+
+        openSort?.addEventListener('click', () => {
+            sortDrawer?.classList.add('active');
+            sortOverlay?.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        const closeSortFn = () => {
+            sortDrawer?.classList.remove('active');
+            sortOverlay?.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        closeSort?.addEventListener('click', closeSortFn);
+        sortOverlay?.addEventListener('click', closeSortFn);
+    }
+
+    function closeAllDrawers() {
+        const filterDrawer = document.getElementById('filter-sidebar');
+        const filterOverlay = document.getElementById('filter-overlay');
+        if (filterDrawer) filterDrawer.classList.remove('active');
+        if (filterOverlay) filterOverlay.classList.remove('active');
+
+        const sortDrawer = document.getElementById('sort-drawer');
+        const sortOverlay = document.getElementById('sort-overlay');
+        if (sortDrawer) sortDrawer.classList.remove('active');
+        if (sortOverlay) sortOverlay.classList.remove('active');
+
+        document.body.style.overflow = '';
+        setTimeout(() => closeSubPanel(), 300);
+    }
+
+    window.closeAll = closeAllDrawers;
+
+    await fetchProductsOnce();
+    initSort();
+    initDrawers();
+    initChipsRouting();
+    initClearFilters();
+    updateChipsActiveState();
+    updateWishlistBadge();
+
+    const initialCategory = getCurrentCategory();
+    console.log('>>> DOMContentLoaded sonu, initialCategory:', initialCategory);
+    updatePageTitle(initialCategory);
+
+    console.log('Category.js v5.8 baslatildi');
+
+
+    window.addEventListener('popstate', () => {
+        console.log('URL degisti, chip aktifligi guncelleniyor...');
+        updateChipsActiveState();
+        fetchProductsOnce();
+    });
+});

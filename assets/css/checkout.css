@@ -1,0 +1,857 @@
+/* 0. RESET */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    font-family: var(--dk-font-body);
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--dk-secondary);
+    color: var(--dk-text);
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* 1. TOP BAR */
+.checkout-top-bar {
+    background-color: var(--dk-primary);
+    color: var(--dk-white);
+    padding: 8px 0;
+    font-size: 11px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 500;
+}
+
+.top-bar-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.top-bar-content i {
+    font-size: 12px;
+    color: var(--dk-accent);
+}
+
+/* 2. HEADER */
+.custom-minimal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid var(--dk-border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--dk-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: var(--dk-transition);
+}
+
+.nav-link:hover {
+    color: var(--dk-accent);
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+    color: var(--dk-primary);
+    text-decoration: none;
+    font-family: var(--dk-font-heading);
+}
+
+/* 3. MAIN CONTAINER */
+#checkout-main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.checkout-modern-header {
+    padding-top: 30px;
+    margin-bottom: 20px;
+}
+
+.checkout-modern-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dk-primary);
+    margin: 0 0 15px 0;
+    font-family: var(--dk-font-heading);
+}
+
+.full-width-form-border {
+    height: 1px;
+    background: var(--dk-border);
+    width: 100%;
+}
+
+/* 4. GRID LAYOUT */
+.checkout-grid-modern {
+    display: grid;
+    grid-template-columns: 63% 37%;
+    gap: 50px;
+    align-items: start;
+}
+
+.checkout-form-column {
+    order: 1;
+    min-width: 0;
+}
+
+.order-summary-column {
+    order: 2;
+    position: sticky;
+    top: 80px;
+}
+
+/* 5. FORM */
+.checkout-section-card {
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    padding: 30px;
+    margin-bottom: 24px;
+    box-shadow: var(--dk-shadow);
+    transition: var(--dk-transition);
+}
+
+.checkout-section-card:hover {
+    box-shadow: var(--dk-shadow-lg);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--dk-primary);
+    font-family: var(--dk-font-heading);
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--dk-accent);
+    color: var(--dk-white);
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: var(--dk-font-body);
+}
+
+.form-row-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--dk-text);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+    font-size: 16px;
+    transition: var(--dk-transition);
+    background: var(--dk-white);
+    color: var(--dk-text);
+    font-family: var(--dk-font-body);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--dk-accent);
+    box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
+}
+
+.form-group input.input-error {
+    border-color: #e54d42;
+    background: #fff8f8;
+}
+
+.mb-15 { margin-bottom: 15px; }
+.mt-20 { margin-top: 20px; }
+
+/* Checkbox */
+.terms-acceptance {
+    margin-top: 20px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--dk-text-light);
+}
+
+.custom-checkbox input {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--dk-accent);
+}
+
+.terms-text a {
+    color: var(--dk-accent);
+    text-decoration: underline;
+    font-weight: 600;
+    transition: var(--dk-transition);
+}
+
+.terms-text a:hover {
+    color: var(--dk-accent-hover);
+}
+
+/* ==========================================
+   ÖDEME BÖLÜMÜ - YATAY DÜZEN
+   ========================================== */
+
+#payment-section {
+    transition: var(--dk-transition);
+}
+
+.payment-desc {
+    font-size: 14px;
+    color: var(--dk-text-light);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+#payment-element {
+    margin-top: 10px;
+    width: 100%;
+}
+
+#payment-element iframe {
+    width: 100% !important;
+}
+
+#payment-element .StripeElement {
+    width: 100%;
+}
+
+#payment-element [role="tablist"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+#payment-element [role="tab"] {
+    flex: 1 !important;
+    min-width: 120px !important;
+    max-width: 200px !important;
+}
+
+/* Hata mesajları */
+#card-errors,
+#checkout-validation-error {
+    color: #e54d42;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff5f5;
+    border-radius: var(--dk-radius-sm);
+    display: none;
+}
+
+/* Buton */
+.main-checkout-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--dk-primary);
+    color: var(--dk-white);
+    border: none;
+    border-radius: var(--dk-radius-sm);
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: var(--dk-transition);
+    font-family: var(--dk-font-body);
+    letter-spacing: 0.5px;
+}
+
+.main-checkout-btn:hover {
+    background: var(--dk-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--dk-shadow);
+}
+
+.main-checkout-btn:disabled,
+.main-checkout-btn.btn-disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 6. ORDER SUMMARY */
+.order-summary-box {
+    background: var(--dk-white);
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius);
+    overflow: hidden;
+    box-shadow: var(--dk-shadow);
+}
+
+.summary-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--dk-border);
+    background: var(--dk-secondary);
+    color: #000;
+    font-family: var(--dk-font-heading);
+}
+
+.summary-product-list {
+    padding: 0 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Urun Karti */
+.summary-item {
+    display: flex;
+    gap: 15px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--dk-border);
+    align-items: flex-start;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.item-thumb {
+    width: 80px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--dk-radius-sm);
+    flex-shrink: 0;
+    background: var(--dk-secondary);
+}
+
+.item-details-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+}
+
+.item-info-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dk-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: var(--dk-font-body);
+}
+
+.item-variant {
+    font-size: 13px;
+    color: var(--dk-text-light);
+    margin-bottom: 12px;
+}
+
+/* Miktar Kontrolu */
+.quantity-control {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+    overflow: hidden;
+    height: 32px;
+}
+
+.qty-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--dk-secondary);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dk-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--dk-transition);
+}
+
+.qty-btn:hover {
+    background: var(--dk-accent);
+    color: var(--dk-white);
+}
+
+.qty-display {
+    width: 40px;
+    height: 32px;
+    border: none;
+    border-left: 1px solid var(--dk-border);
+    border-right: 1px solid var(--dk-border);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--dk-white);
+    outline: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    color: var(--dk-primary);
+    font-family: var(--dk-font-body);
+}
+
+/* Sag Taraf - Fiyat & Sil */
+.item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    min-width: 80px;
+}
+
+.item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dk-accent);
+    white-space: nowrap;
+}
+
+.remove-btn {
+    font-size: 12px;
+    color: var(--dk-text-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    transition: var(--dk-transition);
+}
+
+.remove-btn:hover {
+    color: #e54d42;
+    text-decoration: none;
+}
+
+/* Toplam Alan */
+.totals-area {
+    padding: 12px 20px;
+    background: var(--dk-secondary);
+    border-top: 1px solid var(--dk-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    color: #000;
+}
+
+.total-line span:first-child {
+    color: #000;
+    font-weight: 500;
+}
+
+.total-line span:last-child {
+    font-weight: 600;
+    color: #000;
+}
+
+/* Shipping */
+.static-shipping-text {
+    color: #000;
+    font-weight: 600;
+}
+
+/* Subtotal */
+#subtotal-display {
+    color: #000;
+    font-weight: 600;
+}
+
+.total-line[style*="color: #27ae60"] span:first-child,
+#savings-display {
+    color: #800020 !important;
+    font-weight: 600;
+}
+
+
+
+/* Grand Total */
+.total-line.grand-total {
+    margin-top: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--dk-border);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.grand-total strong:first-child {
+    color: #000;
+    font-weight: 700;
+}
+
+#grand-total-display {
+    font-size: 1.1rem;
+    color: #000;
+    font-family: var(--dk-font-heading);
+}
+
+/* inkl. moms - küçük not */
+.moms-mini-text {
+    font-size: 0.75em;
+    color: #000;
+    text-align: right;
+    display: block;
+    margin-top: 2px;
+    font-weight: 400;
+}
+
+/* Total price wrapper düzeni */
+.total-price-wrapper {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* 7. BOS SEPET */
+#empty-cart-message-box {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 400px;
+    padding: 40px 20px;
+    gap: 20px;
+    background: var(--dk-white);
+    border-radius: var(--dk-radius);
+    box-shadow: var(--dk-shadow);
+}
+
+#empty-cart-message-box h2 {
+    font-size: 24px;
+    color: var(--dk-primary);
+    font-family: var(--dk-font-heading);
+}
+
+#empty-cart-message-box p {
+    font-size: 16px;
+    color: var(--dk-text-light);
+}
+
+#empty-cart-message-box a {
+    display: inline-block;
+    background: var(--dk-primary);
+    color: var(--dk-white);
+    padding: 15px 40px;
+    border-radius: var(--dk-radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--dk-transition);
+    font-family: var(--dk-font-body);
+}
+
+#empty-cart-message-box a:hover {
+    background: var(--dk-accent);
+    transform: translateY(-2px);
+    box-shadow: var(--dk-shadow);
+}
+
+/* 8. FOOTER */
+.custom-checkout-footer {
+    background: var(--dk-secondary);
+    padding: 40px 20px 30px;
+    border-top: 1px solid var(--dk-border);
+    margin-top: 50px;
+}
+
+.checkout-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.checkout-info-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    max-width: 150px;
+}
+
+.info-item i {
+    font-size: 24px;
+    color: var(--dk-accent);
+    margin-bottom: 10px;
+}
+
+.info-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dk-primary);
+    margin-bottom: 4px;
+    font-family: var(--dk-font-heading);
+}
+
+.info-desc {
+    font-size: 12px;
+    color: var(--dk-text-light);
+    line-height: 1.3;
+}
+
+.footer-divider {
+    border: none;
+    border-top: 1px solid var(--dk-border);
+    margin: 20px 0;
+}
+
+.footer-help-section {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.help-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dk-primary);
+    margin-bottom: 15px;
+    font-family: var(--dk-font-heading);
+}
+
+.footer-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.footer-outline-btn {
+    padding: 12px 25px;
+    border: 1px solid var(--dk-border);
+    border-radius: var(--dk-radius-sm);
+    text-decoration: none;
+    color: var(--dk-text);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--dk-white);
+    transition: var(--dk-transition);
+    font-family: var(--dk-font-body);
+}
+
+.footer-outline-btn:hover {
+    background: var(--dk-accent);
+    border-color: var(--dk-accent);
+    color: var(--dk-white);
+    transform: translateY(-2px);
+    box-shadow: var(--dk-shadow);
+}
+
+.footer-bottom-brand {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.footer-text-logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--dk-primary);
+    margin-bottom: 10px;
+    font-family: var(--dk-font-heading);
+}
+
+.copyright {
+    font-size: 12px;
+    color: var(--dk-text-light);
+    margin: 5px 0;
+}
+
+.experience-text {
+    font-size: 11px;
+    color: #bbb;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 9. RESPONSIVE */
+@media (max-width: 1024px) {
+    .checkout-grid-modern {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .order-summary-column {
+        position: static;
+        order: -1;
+    }
+
+    .checkout-modern-header h1 {
+        font-size: 24px;
+    }
+
+    .custom-minimal-header {
+        padding: 12px 15px;
+    }
+
+    .nav-link span {
+        display: none;
+    }
+
+    .checkout-info-grid {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    #checkout-main-container {
+        padding: 0 15px;
+    }
+
+    .checkout-section-card {
+        padding: 20px;
+        border-radius: var(--dk-radius-sm);
+    }
+
+    .form-row-split {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .summary-item {
+        gap: 12px;
+    }
+
+    .item-thumb {
+        width: 70px;
+        height: 90px;
+    }
+
+    .item-name {
+        font-size: 14px;
+        max-width: 150px;
+    }
+
+    .checkout-info-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .footer-btn-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .footer-outline-btn {
+        width: 100%;
+        max-width: 280px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo-text {
+        font-size: 18px;
+    }
+
+    .checkout-modern-header h1 {
+        font-size: 22px;
+    }
+
+    .section-title {
+        font-size: 16px;
+    }
+
+    .main-checkout-btn {
+        font-size: 15px;
+        padding: 14px;
+    }
+}
+
+
+
+
+@media (max-width: 768px) {
+    /* 1. Grid yapısının dışa taşmasını kesin olarak engellemek için */
+    .checkout-grid-modern {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden; /* Dışarı sarkan elemanları kırpar */
+    }
+
+    /* 2. Stripe veya diğer form alanlarının sütunu sıkıştırmaması için */
+    .checkout-form-column, 
+    .order-summary-column {
+        width: 100%;
+        min-width: 0; /* Tarayıcıların varsayılan min-content zorlamasını kırar */
+    }
+
+    /* 3. Ödeme elementinin içindeki esnek butonların (Tab) mobilde taşmasını önlemek */
+    #payment-element [role="tab"] {
+        flex: 1 1 calc(50% - 8px) !important; /* Yan yana sığmıyorsa alt alta düzgünce kırar */
+        max-width: 100% !important;
+    }
+}
