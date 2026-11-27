@@ -23,6 +23,10 @@ console.log('SUPABASE_URL bulundu mu:', SUPABASE_URL ? 'EVET' : 'HAYIR');
 console.log('SUPABASE_ANON_KEY bulundu mu:', SUPABASE_ANON_KEY ? 'EVET (' + SUPABASE_ANON_KEY.substring(0, 20) + '...)' : 'HAYIR');
 console.log('STRIPE_PUBLISHABLE_KEY bulundu mu:', STRIPE_PUBLISHABLE_KEY ? 'EVET (' + STRIPE_PUBLISHABLE_KEY.substring(0, 20) + '...)' : 'HAYIR');
 
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.log('Env değişkenleri yok, mevcut config.js korunuyor.');
+    process.exit(0);
+}
 const configContent = `const CONFIG = {
     SUPABASE: {
         URL: '${SUPABASE_URL}',
